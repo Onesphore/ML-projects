@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon May 09 2016
 
-@author: jmlee
-"""
 import sys
 import classificationMethod
 import numpy as np
@@ -26,22 +21,15 @@ class SupportVectorMachine(classificationMethod.ClassificationMethod):
         self.data = data
 
         if self.data == 'faces':
-            self.sigma = 4 # kernel parameter
-            self.C = 10 # slack variable penalty parameter
+            self.sigma = 4 
+            self.C = 10 
         else:
-            self.sigma = 3 # kernel parameter
-            self.C = 1 # slack variable penalty parameter
+            self.sigma = 3 
+            self.C = 1 
 
 
     def train(self, trainingData, trainingLabels, validationData, validationLabels):
-        """
-        Outside shell to call your method. Do not modify this method
-        """
-
-        """
-        Perform multi-class classification via One-vs-one reduction.
-        Train C(C-1)/2 binary clasifiers for C-way multiclass problem
-        """
+        
         for c1 in range(len(self.legalLabels)):
             for c2 in range(c1+1, len(self.legalLabels)):
                 # c1: +1 / c2: -1
@@ -61,21 +49,9 @@ class SupportVectorMachine(classificationMethod.ClassificationMethod):
                     )
                     for (x, y) in zip(self.supportVectors[(c1,c2)], self.supportVectorLabels[(c1,c2)])]
                 )
-        
-        
+
     def quadraticProgrammingSolver(self, P, q, G, h, A, b):
-        """
-        This method solves the quadratic programming with the following form:
-
-        minimize (1/2) x^T P x + q^T x
-        s.t. Gx <= h
-              Ax = b
-              
-        OUTPUT : solution 'x'.
-
-        * Do not modify this method *
-        """
-
+        
         func = lambda x, sign=1.0, P=P, q=q: 0.5 * np.dot(np.dot(x, P), x) + np.dot(q, x)
         func_deriv = lambda x, sign=1.0, P=P, q=q: 0.5 * np.dot(P + P.T, x) + q
         constraints = []
@@ -97,34 +73,38 @@ class SupportVectorMachine(classificationMethod.ClassificationMethod):
         return solution.x
 
     def trainSVM(self, X, t, C, kernel):
-        """
-        Fill in this function!
-        X : (N x D)-sized numpy array
-        t : N-sized numpy array. t[i] = -1 or +1
-        C : Slack variable penalty parameter
-        kernel : RBF kernel function. Use this like: kernel(x, y)
-
-        - N : the number of training instances
-        - D : the number of features (PCA was used for feature extraction)
-
-        OUTPUT : Lagrange multipliers 'a_1,...,a_N'. N-sized Numpy array
-        """
-
-        "*** YOUR CODE HERE ***"
-        #util.raiseNotDefined()
+        
         N, D = X.shape
+        
+        
+        P = np.zeros((N, N))
+        for i in range(N):
+            for j in range(N):
+                k = kernel(X[i], X[j])
+                P[i][j] = k*t[i] * t[j]
+       
 
-        return np.zeros(N)
+        q = -1 * np.ones(N)
+        
+        G = np.diag(-1 * np.ones(N))
+        G = np.vstack((G, np.diag(np.ones(N))))
+        
+        h = np.zeros(N)
+        h = np.append(h, (C * np.ones(N)))
+        
+        A = np.array([t])
+        
+        b = np.zeros(1)
+      
+        a = self.quadraticProgrammingSolver(P, q, G, h, A, b)
+       
+        
+        return a
 
     def classify(self, testData):
-        """
-        Classify the data based on the posterior distribution over labels.
-
-        You shouldn't modify this method.
-        """
-        print testData.shape
+       
         guesses = []
-        self.counts = [] # Counts are stored for later data analysis (autograder).
+        self.counts = [] 
         for datum in testData:
             count = np.zeros(len(self.legalLabels))
             for c1 in range(len(self.legalLabels)):
@@ -142,26 +122,22 @@ class SupportVectorMachine(classificationMethod.ClassificationMethod):
 
             guesses.append(np.argmax(count))
             self.counts.append(count)
-            
+
         return guesses
         
     def predictSVM(self, x, supportMultipliers, supportVectors, supportVectorLabels, bias, kernel):
-        """
-        Fill in this function!
-        x : test datum. D-sized numpy array.
-        supportMulutipliers : Lagrange multipliers whose values are larger than some threshold (1e-5). M-sized numpy array.
-        supportVectors : Support vectors. (M x D)-sized numpy array.
-        supportVectorLabels : Labels of support vectors(+1 or -1). M-sized numpy array.
-        bias : bias term for prediction.
-        kernel : RBF kernel function. Use this like: kernel(x, y).
+     
+        M, D = supportVectors.shape
 
-        - M : the number of support vectors (usually, M is much smaller than the total number of training data N)
+        y = 0.0
+        for i in range(M):
+            k = kernel(supportVectors[i], x)
+            y += supportMultipliers[i] * supportVectorLabels[i] * k
+        y += np.nan_to_num(bias)
 
-        OUTPUT : Prediction result. The output should be +1 or -1 (scalar).
-        """
-
-        "*** YOUR CODE HERE ***"
-        #util.raiseNotDefined()
-
-        return 1
+        if y < 0:
+            return -1
+        else:
+            return 1
+            
 

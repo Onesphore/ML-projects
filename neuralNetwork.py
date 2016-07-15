@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jun 08 2016
 
-@author: jphong
-"""
 import classificationMethod
 import numpy as np
 import util
@@ -19,7 +14,7 @@ def sigmoid(X):
 def ReLU(X):
   return X * (X > 0.)
 
-# defined by Ones
+
 def DerivReLU(X):
   return 1 * (X > 0.)
     
@@ -41,12 +36,7 @@ class NeuralNetworkClassifier(classificationMethod.ClassificationMethod):
     self.epoch = 1000
 
   def train(self, trainingData, trainingLabels, validationData, validationLabels):
-    """
-    Outside shell to call your method.
-    Iterates several learning rates and regularization parameter to select the best parameters.
-
-    Do not modify this method.
-    """
+  
     if len(self.legalLabels) > 2:
       zeroFilledLabel = np.zeros((trainingData.shape[0], len(self.legalLabels)))
       zeroFilledLabel[np.arange(trainingData.shape[0]), trainingLabels] = 1.
@@ -59,22 +49,13 @@ class NeuralNetworkClassifier(classificationMethod.ClassificationMethod):
     for i in xrange(self.epoch):
       netOut = self.forwardPropagation(trainingData)
     
-      # If you want to print the loss, please uncomment it
-      #print "Step: ", (i+1), " - ", self.loss(trainingLabels, netOut)
+ 
 
       self.backwardPropagation(netOut, zeroFilledLabel, 0.02 / float(len(trainingLabels)))
 
-    # If you want to print the accuracy for the training data, please uncomment it
-    # guesses = np.argmax(self.forwardPropagation(trainingData), axis=1)
-    # acc = [guesses[i] == trainingLabels[i] for i in range(trainingLabels.shape[0])].count(True)
-    # print "Training accuracy:", acc / float(trainingLabels.shape[0]) * 100., "%"
 
   def initializeWeight(self, featureCount, labelCount):
-    """
-    Initialize weights and bias with randomness.
-
-    Do not modify this method.
-    """
+  
     self.W = []
     self.b = []
     curNodeCount = featureCount
@@ -105,28 +86,7 @@ class NeuralNetworkClassifier(classificationMethod.ClassificationMethod):
       curNodeCount = self.layerStructure[i]
 
   def forwardPropagation(self, trainingData):
-    """
-    Fill in this function!
 
-    trainingData : (N x D)-sized numpy array
-    - N : the number of training instances
-    - D : the number of features
-    RETURN : output or result of forward propagation of this neural network
-
-    Forward propagate the neural network, using weight and biases saved in self.W and self.b
-    You may use self.outAct and ReLU for the activation function.
-    Note the type of weight matrix and bias vector:
-    self.W : list of each layer's weights, while each weights are saved as NumPy array
-    self.b : list of each layer's biases, while each biases are saved as NumPy array
-    - D : the number of features
-    - C : the number of legal labels
-    Also, for activation functions
-    self.outAct: (automatically selected) output activation function
-    ReLU: rectified linear unit used for the activation function of hidden layers
-    """
-
-    "*** YOUR CODE HERE ***"
-    # input
     self.Y0 = trainingData
     
     # First layer
@@ -148,33 +108,7 @@ class NeuralNetworkClassifier(classificationMethod.ClassificationMethod):
           
 
   def backwardPropagation(self, netOut, trainingLabels, learningRate):
-    """
-    Fill in this function!
-
-    netOut : output or result of forward propagation of this neural network
-    trainingLabels: (D x C) 0-1 NumPy array
-    learningRate: python float, learning rate parameter for the gradient descent
-
-    Back propagate the error and update weights and biases.
-
-    Here, 'trainingLabels' is not a list of labels' index.
-    It is converted into a matrix (as a NumPy array) which is filled to 0, but has 1 on its true label.
-    Therefore, let's assume i-th data have a true label c, then trainingLabels[i, c] == 1
-    Also note that if this is a binary classification problem, the number of classes
-    which neural network makes is reduced to 1.
-    So to match the number of classes, for the binary classification problem, trainingLabels is flatten
-    to 1-D array.
-    (Here, let's assume i-th data have a true label c, then trainingLabels[i] == c)
-
-    It looks complicated, but it is simple to use.
-    In conclusion, you may use trainingLabels to calcualte the error of the neural network output:
-    delta = netOut - trainingLabels
-    and do back propagation as a manual.
-    """
-
-    "*** YOUR CODE HERE ***"
     
-    # final version
     
     #delta = netOut - trainingLabels
     
@@ -201,11 +135,7 @@ class NeuralNetworkClassifier(classificationMethod.ClassificationMethod):
     
 
   def classify(self, testData):
-    """
-    Classify the data based on the posterior distribution over labels.
-
-    Do not modify this method.
-    """
+  
     logposterior = self.forwardPropagation(testData)
 
     if self.outAct == softmax:

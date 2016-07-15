@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Mar 18 19:48:36 2016
 
-@author: jmlee
-"""
 import math
 import sys
 import classificationMethod
@@ -16,32 +11,16 @@ class GaussianDiscriminantAnalysisClassifier(classificationMethod.Classification
     self.type = type
 
   def train(self, trainingData, trainingLabels, validationData, validationLabels):
-    """
-    Outside shell to call your method. Do not modify this method
-    """
+    
     self.trainAndTune(trainingData, trainingLabels, validationData, validationLabels)
 
   def trainAndTune(self, trainingData, trainingLabels, validationData, validationLabels):
-    """
-    Fill in this function!
-    trainingData : (N x D)-sized numpy array
-    validationData : (M x D)-sized numpy array
-    trainingLabels : N-sized list
-    validationLabels : M-sized list
-    - N : the number of training instances
-    - M : the number of validation instances
-    - D : the number of features (PCA was used for feature extraction)
-    
-    Train the classifier by estimating MLEs.
-    Evaluate LDA and QDA respectively and select the model that gives
-    higher accuracy on the validationData.
-    """
     
     
     self.trainingDataSize = trainingData.shape[0]
     self.datumLen = len(trainingData[0])
     
-    # pi_c's
+
     self.labels_priors = {}
     self.labelsCount = {}
     self.training_labels, priors = np.unique(trainingLabels, return_counts = True)
@@ -57,7 +36,7 @@ class GaussianDiscriminantAnalysisClassifier(classificationMethod.Classification
         self.labels_priors.update({label:priors[i]})
         i += 1
     
-    # myu's
+
     self.averages = {}
     i = 0
     for label in trainingLabels:
@@ -70,9 +49,7 @@ class GaussianDiscriminantAnalysisClassifier(classificationMethod.Classification
         
     for label in self.averages.keys():
         self.averages[label] = np.true_divide(self.averages[label], self.labelsCount[label])
-    #print self.averages
-    #return
-    # sigma's
+
     self.covariances = {}
     i = 0
     for label in trainingLabels:
@@ -81,7 +58,7 @@ class GaussianDiscriminantAnalysisClassifier(classificationMethod.Classification
         val = np.dot(np.transpose(diff), diff)
         if label not in self.covariances.keys():
             self.covariances.update({label:val})
-            #self.covariances[label] = np.add(self.covariances[label], val)
+            
             
         else:
             self.covariances[label] = np.add(self.covariances[label], val)
@@ -152,11 +129,7 @@ class GaussianDiscriminantAnalysisClassifier(classificationMethod.Classification
     return f_sum
 
   def classify(self, testData):
-    """
-    Classify the data based on the posterior distribution over labels.
 
-    You shouldn't modify this method.
-    """
     guesses = []
     self.posteriors = [] # Log posteriors are stored for later data analysis (autograder).
     for datum in testData:
@@ -167,21 +140,13 @@ class GaussianDiscriminantAnalysisClassifier(classificationMethod.Classification
     return guesses
     
   def calculateLogJointProbabilities(self, datum):
-    """
-    datum: D-sized numpy array
-    - D : the number of features (PCA was used for feature extraction)
-
-    Returns the log-joint distribution over legal labels and the datum.
-    Each log-probability should be stored in the list, e.g.    
-    logJoint[3] = <Estimate of log( P(Label = 3, datum) )>
-    """
+   
     logJoint = [0 for c in self.legalLabels]
     
     datumMat = np.asmatrix(datum)
     i = 0
     if self.betterMethod == "QDA":
         for label in self.legalLabels:
-            #def QDA(self, pi_c, myu_c, sigma_c, x):
             pi_c = self.labels_priors[label]
             myu_c = self.averages[label]
             sigma_c = self.covariances[label]

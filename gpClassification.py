@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Apr 18 2016
 
-@author: bjlee
-"""
 import classificationMethod
 import numpy as np
 from scipy import linalg
@@ -25,11 +20,7 @@ class gaussianProcessClassifier(classificationMethod.ClassificationMethod):
         self.data = data
         
     def initializeHyp(self):
-        """
-        Initialize hyper-parameter appropriately
-    
-        Do not modify this method.
-        """
+        
         self.trainingShape = np.shape(self.trainingData)
         [n,d] = self.trainingShape
         c = len(self.legalLabels)
@@ -46,55 +37,22 @@ class gaussianProcessClassifier(classificationMethod.ClassificationMethod):
     
 
     def train(self, trainingData, trainingLabels, validationData, validationLabels):
-        """
-        You may commentize or decommentize few lines here to change the behavior of the program
-        """
+        
         
         self.trainingData = trainingData
         self.trainingLabels = trainingLabels
         self.initializeHyp()
 
-        # added by Ones (me)
+        
         self.global_a, _ = self.findMode(self.trainingData, self.trainingLabels, self.hyp)
         self.global_Kcs = self.calculateCovariance(self.trainingData, self.hyp)
         [_, tc] = self.trainingLabels2t(self.trainingLabels)
         [_, _, [self.pi_n, self.Ecs_n, self.M_n, self.R_n, _]] = self.calculateIntermediateValues(tc.T.ravel(), self.global_a, self.global_Kcs)
 
-        """
-        Decommentize the line below to check whether the implementation is correct:
         
-        This method compares the gradient computed by method 'derivative_of_marginalLikelihood'
-        
-        with the finite difference of method 'marginalLikelihood'.
-        
-        If the final output of 'checkGradient' method is very small (less than 1e-4),
-        
-        your implementation on method 'marginalLikelihood' may be right.
-        """
-        #self.checkGradient(1e-4) 
-        
-        """
-        The three lines below optimizes the marginal likelihood with conjugate gradient algorithm. 
-        
-        Since I initialized hyper-parameters with appropriate values, the algorithm would do well without optimization;       
-               
-        decommentize theses lines if you are curious.
-        
-        Note: optimization with digit dataset may not work due to the numerical issue
-        """
-        #print "initial hyp: ", self.hyp.ravel()
-        #print "initial negative approx. marginal likelihood: ", self.marginalLikelihood(self.hyp)
-        #res = sp.optimize.minimize(self.marginalLikelihood, self.hyp, method='CG'\
-        #    , jac=self.derivative_of_marginalLikelihood, options = {'maxiter':25})    
-        #self.hyp = np.reshape(res.x, self.hypSize)
-        #print res
         
     def calculateIntermediateValues(self, t, a, Kcs):
-        """
-        You should implement this method:
         
-        Read README file.
-        """
         [n,d] = self.trainingShape
         c = len(self.legalLabels)
 
@@ -112,7 +70,7 @@ class gaussianProcessClassifier(classificationMethod.ClassificationMethod):
         for i in range(c):
             Dcsrt = np.diag(np.sqrt(pic[:,i]))
             PM = np.dot(Dcsrt, np.dot(Kcs[i], Dcsrt) )
-            #PM = reduce(np.dot, [Dcsrt, Kcs[i], Dcsrt])
+
             L = linalg.cholesky(np.identity(n)+ PM, lower = True)
             
             x1= np.linalg.solve(L, Dcsrt)
@@ -165,7 +123,7 @@ class gaussianProcessClassifier(classificationMethod.ClassificationMethod):
         pv = np.dot(pv,x2)
         b = np.add(b, pv)
 
-        ############ Implement here
+ 
         valuesForModes = [W, b, logdet, K]        
         valuesForDerivatives = [E, M, R, b, pi, K]
         valuesForPrediction = [pi, Ecs, M, R, K]
@@ -177,12 +135,8 @@ class gaussianProcessClassifier(classificationMethod.ClassificationMethod):
           
         Kcs = self.calculateCovariance(trainingData, hyp)
         [t,_] = self.trainingLabels2t(trainingLabels)
-        """
-        You should implement this method:
         
-        Read README file.
-        """
-        ############ Implement here
+
         t = t[:, 0]
         a = np.zeros(c*n)
         converg = -np.inf
@@ -199,16 +153,11 @@ class gaussianProcessClassifier(classificationMethod.ClassificationMethod):
                 converg = sm
 
         Z = sm - logdet
-        ############ Implement here
+        
         return a, Z
       
     def calculatePredictiveDistribution(self, datum, pi, Ecs, M, R, tc):
-        """
-        You should implement this method:
         
-        Read README file.
-        """
-        ############ Implement here
         [c, n, d] = len(self.legalLabels), len(self.trainingData), len(self.trainingData[0])  
         X = np.vstack((self.trainingData, datum))
         
@@ -240,21 +189,13 @@ class gaussianProcessClassifier(classificationMethod.ClassificationMethod):
             sigma[i][i] += (Knns[i] - np.dot(f.T, Kns[i]))
 
         mu = np.array(mu)
-        ############ Implement here
+
         samples = self.numpRng.multivariate_normal(mu.ravel(),sigma,self.numberofsamples)
         predict = softmax(samples)
         return np.mean(predict,0)
         
     def derivative_of_marginalLikelihood(self, hyp):
-        """
-        This method calculates the derivative of marginal likelihood.
         
-        You may refer to this code to see what methods in numpy is useful
-        
-        while you are implementing other functions.
-        
-        Do not modify this method.
-        """
         trainingData = self.trainingData
         trainingLabels = self.trainingLabels
         c = len(self.legalLabels)
@@ -306,11 +247,7 @@ class gaussianProcessClassifier(classificationMethod.ClassificationMethod):
         return -dZ.ravel()
       
     def marginalLikelihood(self, hyp):
-        """
-        Wrapper function for scipy.optimize:
-                
-        Do not modify this method.
-        """
+        
         trainingData = self.trainingData
         trainingLabels = self.trainingLabels
         hyp = np.reshape(hyp, self.hypSize)
@@ -319,11 +256,7 @@ class gaussianProcessClassifier(classificationMethod.ClassificationMethod):
         return -Z
         
     def classify(self, testData):
-        """
-        Classify the data based on the posterior distribution over labels.
-    
-        Do not modify this method.
-        """
+        
         guesses = []
         self.posteriors = [] # Log posteriors are stored for later data analysis (autograder).
         
@@ -342,13 +275,7 @@ class gaussianProcessClassifier(classificationMethod.ClassificationMethod):
     
         
     def checkGradient(self, error):
-        """
-        Method to check whether the gradient is right by comparing with finite difference.
         
-        Since I give you the right gradient function, you may use this to check
-        
-        whether the marginal likelihood implementation is right.
-        """
         hyp = self.hyp
         c = len(self.legalLabels)
         [n,d] = self.trainingShape
@@ -369,18 +296,7 @@ class gaussianProcessClassifier(classificationMethod.ClassificationMethod):
 
 
     def covARD(self, hyp, x, z = None, i = None):
-        """
-         Squared Exponential covariance function with isotropic distance measure. The
-         covariance function is parameterized as:
         
-         k(x^p,x^q) = sf^2 * exp(-(x^p - x^q)'*inv(P)*(x^p - x^q)/2) 
-        
-         where the P matrix is ell^2 times the unit matrix and sf^2 is the signal
-         variance. The hyperparameters are:
-         hyp = [ log(ell)
-                 log(sf)  ]
-
-        """
         def sq_dist(a, b = None):
             [D, n] = np.shape(a)
             if b is None:

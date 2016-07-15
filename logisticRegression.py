@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Apr 18 2016
 
-@author: jphong
-"""
 import classificationMethod
 import numpy as np
 import util
@@ -21,16 +16,11 @@ class LogisticRegressionClassifier(classificationMethod.ClassificationMethod):
     self.costs = []
     self.epoch = 1000
 
-    self.bestParam = None # You must fill in this variable in validateWeight
-    self.accur = 0.0 # added by me (Ones)
+    self.bestParam = None 
+    self.accur = 0.0 
 
   def train(self, trainingData, trainingLabels, validationData, validationLabels):
-    """
-    Outside shell to call your method.
-    Iterates several learning rates and regularization parameter to select the best parameters.
-
-    Do not modify this method.
-    """
+   
     for lRate in self.learningRate:
       curCosts = []
       for l2Reg in self.l2Regularize:
@@ -44,11 +34,7 @@ class LogisticRegressionClassifier(classificationMethod.ClassificationMethod):
         
 
   def initializeWeight(self, featureCount, labelCount):
-    """
-    Initialize weights and bias with randomness.
-
-    Do not modify this method.
-    """
+   
     if self.initialWeightBound is None:
       initBound = 1.0
     else:
@@ -57,28 +43,8 @@ class LogisticRegressionClassifier(classificationMethod.ClassificationMethod):
     self.b = self.numpRng.uniform(-initBound, initBound, (labelCount, ))
 
   def calculateCostAndGradient(self, trainingData, trainingLabels):
-    """
-    Fill in this function!
+    
 
-    trainingData : (N x D)-sized numpy array
-    trainingLabels : N-sized list
-    - N : the number of training instances
-    - D : the number of features (PCA was used for feature extraction)
-    RETURN : (cost, grad) python tuple
-    - cost: python float, negative log likelihood of training data
-    - grad: gradient which will be used to update weights and bias (in updateWeight)
-
-    Evaluate the negative log likelihood and its gradient based on training data.
-    Gradient evaluted here will be used on updateWeight method.
-    Note the type of weight matrix and bias vector:
-    self.W : (D x C)-sized numpy array
-    self.b : C-sized numpy array
-    - D : the number of features (PCA was used for feature extraction)
-    - C : the number of legal labels
-    """
-
-    "*** YOUR CODE HERE ***"
-    # cost a.k.a NLL
     cost = 0.0
     big_mat = np.dot(trainingData, self.W) + self.b
     
@@ -90,7 +56,7 @@ class LogisticRegressionClassifier(classificationMethod.ClassificationMethod):
             
     a_max = np.amax(big_mat, axis=1)
     exp_mat = np.exp(np.transpose(np.transpose(big_mat) - a_max))
-    #exp_mat = np.exp(big_mat - np.transpose(a_max))
+
     sum_exp = np.log(np.sum(exp_mat, axis = 1))
     
     cost -= np.sum(a_max)
@@ -113,20 +79,6 @@ class LogisticRegressionClassifier(classificationMethod.ClassificationMethod):
     return cost, grad
 
   def updateWeight(self, grad, learningRate, l2Reg):
-    """
-    Fill in this function!
-    grad : gradient which was evaluated in calculateCostAndGradient
-    learningRate : python float, learning rate for gradient descent
-    l2Reg: python float, L2 regularization parameter
-
-    Update the logistic regression parameters using gradient descent.
-    Update must include L2 regularization.
-    Please note that bias parameter must not be regularized.
-    """
-
-    "*** YOUR CODE HERE ***"
-    #w_copy = np.copy(self.W)
-    #b_copy = np.copy(self.b)
     
     self.W = self.W - learningRate * (grad + l2Reg * self.W)
     self.b = self.b - learningRate * self.b_s
@@ -135,19 +87,6 @@ class LogisticRegressionClassifier(classificationMethod.ClassificationMethod):
         
 
   def validateWeight(self, validationData, validationLabels):
-    """
-    Fill in this function!
-
-    validationData : (M x D)-sized numpy array
-    validationLabels : M-sized list
-    - M : the number of validation instances
-    - D : the number of features (PCA was used for feature extraction)
-
-    Choose the best parameters of logistic regression.
-    Calculates the accuracy of the validation set to select the best parameters.
-    """
-
-    "*** YOUR CODE HERE ***"
     
     if self.bestParam != None:
         w, b = self.bestParam
@@ -173,13 +112,9 @@ class LogisticRegressionClassifier(classificationMethod.ClassificationMethod):
 
 
   def classify(self, testData):
-    """
-    Classify the data based on the posterior distribution over labels.
 
-    Do not modify this method.
-    """
     guesses = []
-    self.posteriors = [] # Log posteriors are stored for later data analysis (autograder).
+    self.posteriors = [] 
     for datum in testData:
       logposterior = self.calculateConditionalProbability(datum)
       guesses.append(np.argmax(logposterior))
@@ -188,20 +123,10 @@ class LogisticRegressionClassifier(classificationMethod.ClassificationMethod):
     return guesses
     
   def calculateConditionalProbability(self, datum):
-    """
-    datum : D-sized numpy array
-    - D : the number of features (PCA was used for feature extraction)
-    RETURN : C-sized numpy array
-    - C : the number of legal labels
-
-    Returns the conditional probability p(y|x) to predict labels for the datum.
-    Return value is NOT the log of probability, which means 
-    sum of your calculation should be 1. (sum_y p(y|x) = 1)
-    """
+   
     
     bestW, bestb = self.bestParam # These are parameters used for calculating conditional probabilities
 
-    "*** YOUR CODE HERE ***"
     datum_mat = np.matrix(datum)
     prob = []
     
